@@ -1,13 +1,16 @@
 
-# VCV Template plugin
+# Circlefade VCV plugin
 
-The VCV Template plugin is a starting point for developing your own plugins for VCV Rack.
-It implements a simple sine VCO, demonstrating inputs, outputs, parameters, and other concepts.
+This repo contains our VCV plugins.
 
-See https://vcvrack.com/manual/PluginDevelopmentTutorial.html for a development tutorial.
 
-## Contributing
+# Module: Random 
 
-I welcome Issues and Pull Requests to this repository if you have suggestions for improvement.
+This module creates random pitch and gate outputs.
 
-This template is released into the public domain ([CC0](https://creativecommons.org/publicdomain/zero/1.0/)).
+
+![alt text](https://raw.githubusercontent.com/max-circlefade/Circlefade/res/random.svg)
+
+The density lets you control how much gates are sent.
+The temperature lets you control the pitch of the notes sent
+The ratcheting option enables multiple gates sends
