@@ -9,8 +9,10 @@ This repo contains our VCV plugins.
 This module creates random pitch and gate outputs.
 
 
-![alt text](https://raw.githubusercontent.com/max-circlefade/Circlefade/res/Random.svg)
+![alt text](https://static.wixstatic.com/media/ed93a0_c8bfb29a915542139f95080f688d627f~mv2.png)
 
 The density lets you control how much gates are sent.
-The temperature lets you control the pitch of the notes sent
-The ratcheting option enables multiple gates sends
+
+The temperature lets you control the pitch of the notes sent.
+
+The ratcheting option enables multiple gates sends.
