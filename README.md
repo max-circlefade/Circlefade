@@ -3,6 +3,8 @@
 
 This repo contains our VCV plugins.
 
+Learn More: www.circlefade.com/vcv
+
 
 # Module: Random 
 

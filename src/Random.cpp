@@ -40,66 +40,74 @@ struct Random : Module {
 	float iter = 0;
 
 
-	Random() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS) {}
-	void step() override;
+	Random() {
+		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);	
+		configParam(Random::TEMP_PARAM, 0.0, 3.0, 0.0, "TEMPERATURE");
+		configParam(Random::DENSITY_PARAM, 0.0, 3.0, 0.0, "DENSITY");
+		configParam(Random::DUR_PARAM, 0.0, 5.0, 0.30, "RATCHETING");}
 
-	// For more advanced Module features, read Rack's engine.hpp header file
-	// - toJson, fromJson: serialization of internal data
-	// - onSampleRateChange: event triggered by a change of sample rate
-	// - onReset, onRandomize, onCreate, onDelete: implements special behavior when user clicks these from the context menu
+	void process(const ProcessArgs &args) override;
 };
 
 
-void Random::step() {
+void Random::process(const ProcessArgs &args) {
 
-	float densityInput = params[DENSITY_PARAM].value + inputs[DENSITY_INPUT].value;
-	float tempInput = params[TEMP_PARAM].value + inputs[TEMP_INPUT].value;
-	float durInput = params[DUR_PARAM].value + inputs[DUR_INPUT].value/4;
+	// Getting the knob and cv ins value
+	float densityInput = params[DENSITY_PARAM].getValue() + inputs[DENSITY_INPUT].getVoltage();
+	float tempInput = params[TEMP_PARAM].getValue() + inputs[TEMP_INPUT].getVoltage();
+	float durInput = params[DUR_PARAM].getValue() + inputs[DUR_INPUT].getVoltage()/4;
 	
+	// Updating the value only if it changed from last step
 	if(lastDur != durInput)
 	{
-		duration = clampf(durInput, 0.0f, 5.0f) / 5.0f *10000+1000;
+		duration = clamp(durInput, 0.0f, 5.0f) / 5.0f *10000+1000;
 		lastDur = durInput;
 	}	
 
+
 	if(lastDensity != densityInput)
 	{
-		densityScaled = clampf(densityInput, 0.0f, 3.0f) / 3.0f;
+		densityScaled = clamp(densityInput, 0.0f, 3.0f) / 3.0f;
 		threshold = densityScaled/5000.0f;
 		lastDensity = densityInput;
 	}
 	if(lastTemp != tempInput)
 	{
-		tempScaled = clampf(tempInput, 0.0f, 3.0f) / 3.0f;
+		tempScaled = clamp(tempInput, 0.0f, 3.0f) / 3.0f;
 		lastTemp = tempInput;
 	}
 
-
+	// checking if the random is triggered and if so, that it has not reached max length
 	if (lastnoise < threshold && length < duration)
 	{
 		length=length+1;	
 
-		if (length/1000%2 ==0)
+		// Checking if the gate will be on or off (due to the ratcheting effect)
+		if (length/2000%2 ==0)
 			{
-				outputs[PITCH_OUTPUT].value = lastPitch;
-				outputs[TRIG_OUTPUT].value = 5.0f;
+				outputs[PITCH_OUTPUT].setVoltage(lastPitch);
+				outputs[TRIG_OUTPUT].setVoltage(5.0f);
 			}
 		else
 			{
-				outputs[PITCH_OUTPUT].value = lastPitch;
-				outputs[TRIG_OUTPUT].value = 0.0f;
-			}			
+				outputs[PITCH_OUTPUT].setVoltage(lastPitch);
+				outputs[TRIG_OUTPUT].setVoltage(0.0f);
+			}	
+
+		// the last 1000 steps are always off		
 		if (length+1000>duration)
 			{
-				outputs[PITCH_OUTPUT].value = lastPitch;
-				outputs[TRIG_OUTPUT].value = 0.0f;
+				outputs[PITCH_OUTPUT].setVoltage(lastPitch);
+				outputs[TRIG_OUTPUT].setVoltage(0.0f);
 			}
 
 											
 	}
+
+	// if not: recalculate a random number to try and fit under the threshold
 	else
 	{
-		outputs[TRIG_OUTPUT].value = 0.0;
+		outputs[TRIG_OUTPUT].setVoltage(0.0);
 		length=0.0;
 		float noiseValue = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 		float pitchValue = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);	
@@ -113,32 +121,29 @@ void Random::step() {
 
 
 struct RandomWidget : ModuleWidget {
-	RandomWidget(Random *module) : ModuleWidget(module) {
-		setPanel(SVG::load(assetPlugin(plugin, "res/Random.svg")));
+	RandomWidget(Random *module) {
+		setModule(module);
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Random2.svg")));
 
-		addChild(Widget::create<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
-		addChild(Widget::create<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-		addChild(Widget::create<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-		addChild(Widget::create<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
+		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addParam(ParamWidget::create<Rogan3PWhite>(Vec(67, 182), module, Random::TEMP_PARAM, 0.0, 3.0, 0.0));
-		addParam(ParamWidget::create<Rogan3PWhite>(Vec(67, 116), module, Random::DENSITY_PARAM, 0.0, 3.0, 0.0));
-		addParam(ParamWidget::create<Rogan3PWhite>(Vec(67, 248), module, Random::DUR_PARAM, 0.0, 5.0, 0.0));
+		addParam(createParam<Rogan3PWhite>(Vec(67, 182), module, Random::TEMP_PARAM));
+		addParam(createParam<Rogan3PWhite>(Vec(67, 116), module, Random::DENSITY_PARAM));
+		addParam(createParam<Rogan3PWhite>(Vec(67, 248), module, Random::DUR_PARAM));
 
-		addInput(Port::create<PJ301MPort>(Vec(14, 191), Port::INPUT, module, Random::DENSITY_INPUT));
-		addInput(Port::create<PJ301MPort>(Vec(14, 124), Port::INPUT, module, Random::TEMP_INPUT));
-		addInput(Port::create<PJ301MPort>(Vec(14, 258), Port::INPUT, module, Random::DUR_INPUT));
+		addInput(createInput<PJ301MPort>(Vec(14, 191), module, Random::TEMP_INPUT));
+		addInput(createInput<PJ301MPort>(Vec(14, 124), module, Random::DENSITY_INPUT));
+		addInput(createInput<PJ301MPort>(Vec(14, 258), module, Random::DUR_INPUT));
 
-		addOutput(Port::create<PJ301MPort>(Vec(28, 320), Port::OUTPUT, module, Random::PITCH_OUTPUT));
-		addOutput(Port::create<PJ301MPort>(Vec(71, 320), Port::OUTPUT, module, Random::TRIG_OUTPUT));
+		addOutput(createOutput<PJ301MPort>(Vec(28, 320), module, Random::PITCH_OUTPUT));
+		addOutput(createOutput<PJ301MPort>(Vec(71, 320), module, Random::TRIG_OUTPUT));
 
 	
 	}
 };
 
 
-// Specify the Module and ModuleWidget subclass, human-readable
-// author name for categorization per plugin, module slug (should never
-// change), human-readable module name, and any number of tags
-// (found in `include/tags.hpp`) separated by commas.
-Model *modelRandom = Model::create<Random, RandomWidget>("Circlefade", "Random", "Random", OSCILLATOR_TAG);
+Model *modelRandom = createModel<Random, RandomWidget>("Random");
