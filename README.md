@@ -14,6 +14,6 @@ Here are some of our modules:
 ![alt text](https://static.wixstatic.com/media/ed93a0_ab52733a6cd94b3c83fe0f2e499b1d3b~mv2.png)
 
 
-Have fun and open issues is you find bugs!!
+Have fun and open issues if you find bugs!!
 
-Max.
+Best, Max.
