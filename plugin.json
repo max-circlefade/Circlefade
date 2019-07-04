@@ -6,9 +6,9 @@
   "brand": "Circlefade",
   "author": "Max Circlefade",
   "authorEmail": "max@circlefade.com",
-  "authorUrl": "www.circlefade.com",
-  "pluginUrl": "www.circlefade.com/vcv",
-  "manualUrl": "www.circlefade.com/vcv",
+  "authorUrl": "https://www.circlefade.com",
+  "pluginUrl": "https://www.circlefade.com/vcv",
+  "manualUrl": "https://www.circlefade.com/vcv",
   "sourceUrl": "https://github.com/max-circlefade/Circlefade",
   "donateUrl": "",
   "modules": [
