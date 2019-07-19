@@ -10,6 +10,7 @@ void init(Plugin *p) {
 
 	// Add all Models defined throughout the pluginInstance
 	p->addModel(modelRandom);
+	p->addModel(modelRandom2);
 	p->addModel(modelLFO);
 	p->addModel(modelDelay);
 	p->addModel(modelClock);

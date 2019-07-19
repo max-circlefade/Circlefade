@@ -8,6 +8,7 @@ extern Plugin *pluginInstance;
 
 // Forward-declare each Model, defined in each module source file
 extern Model *modelRandom;
+extern Model *modelRandom2;
 extern Model *modelLFO;
 extern Model *modelDelay;
 extern Model *modelClock;
