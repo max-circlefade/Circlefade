@@ -132,10 +132,10 @@ void Clock::process(const ProcessArgs &args) {
 		counterloop=0;}
 
 	// Sending the clock ticks
-	run_pulse1 = Pulse1.process(4 / args.sampleRate);
+	run_pulse1 = Pulse1.process(0.4f / args.sampleRate);
 	outputs[V1_OUTPUT].setVoltage((run_pulse1 && playing_bool ? 10.0f : 0.0f));
 
-	run_pulse2 = Pulse2.process(4 / args.sampleRate);
+	run_pulse2 = Pulse2.process(0.4f / args.sampleRate);
 	outputs[V2_OUTPUT].setVoltage((run_pulse2 && playing_bool ? 10.0f : 0.0f));
 
 }
